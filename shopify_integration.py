@@ -1,21 +1,33 @@
-# shopify_integration.py
-
-import shopify
 import os
+import psycopg2
+import pandas as pd
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Shopify API credentials from .env
-SHOP_URL = os.getenv("SHOP_URL")
-ACCESS_TOKEN = os.getenv("SHOPIFY_ACCESS_TOKEN")
+def sync_shopify_customers():
+    df = pd.read_csv("shopify_customers_export.csv")
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+    imported = 0
+    for _, row in df.iterrows():
+        email = row.get("Email")
+        if not email:
+            continue
+        cur.execute("SELECT 1 FROM leads WHERE email = %s", (email,))
+        if not cur.fetchone():
+            cur.execute("INSERT INTO leads (email) VALUES (%s)", (email,))
+            imported += 1
+    conn.commit()
+    cur.close()
+    conn.close()
+    print(f"Imported {imported} shopify customers")
 
-# Set up the Shopify session
-shopify.ShopifyResource.set_site(f"https://{SHOP_URL}")
-session = shopify.Session(SHOP_URL, "2025-01", ACCESS_TOKEN)
-shopify.ShopifyResource.activate_session(session)
+def sync_shopify_orders():
+    df = pd.read_csv("shopify_orders_export_1.csv")
+    print(f"Imported {len(df)} shopify orders")  # Placeholder for real logic
 
-# Test by fetching shop data
-shop = shopify.Shop.current()
-print(shop)
+def sync_abandoned_checkouts():
+    df = pd.read_csv("shopify_checkouts_export_1.csv")
+    print(f"Imported {len(df)} abandoned checkouts")  # Placeholder for real logic

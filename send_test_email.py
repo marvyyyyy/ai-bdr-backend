@@ -1,38 +1,34 @@
-"""
-send_test_email.py — Sends a test email using environment variables and Gmail SMTP.
-"""
-
+import base64
 import os
-import smtplib
 from email.mime.text import MIMEText
 from dotenv import load_dotenv
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
 
 load_dotenv()
+TOKEN_FILE = "token_lu.json"
+SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-def send_test_email():
-    """Sends a test email using environment variables and Gmail SMTP."""
-    try:
-        subject = "✅ Test Email from the AI BDR App"
-        body = (
-            "This is a test email sent from lu@shailusounds.com via Python!"
-        )
-        sender = os.getenv("EMAIL_USERNAME")
-        recipient = "a.ferdousian94@gmail.com"
+def send_email(to, subject, body):
+    creds = None
+    if os.path.exists(TOKEN_FILE):
+        creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            creds = flow.run_local_server(port=0)
+            with open(TOKEN_FILE, "w") as token:
+                token.write(creds.to_json())
 
-        msg = MIMEText(body)
-        msg["Subject"] = subject
-        msg["From"] = sender
-        msg["To"] = recipient
+    service = build("gmail", "v1", credentials=creds)
 
-        with smtplib.SMTP(os.getenv("EMAIL_HOST"), int(os.getenv("EMAIL_PORT"))) as server:
-            server.starttls()
-            server.login(sender, os.getenv("EMAIL_PASSWORD"))
-            server.send_message(msg)
-
-        print("✅ Test email sent successfully!")
-
-    except smtplib.SMTPException as e:
-        print("❌ Failed to send email:", e)
-
-if __name__ == "__main__":
-    send_test_email()
+    message = MIMEText(body)
+    message['to'] = to
+    message['subject'] = subject
+    raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
+    service.users().messages().send(userId="me", body={'raw': raw}).execute()
+    print(f"📨 Sent email to {to}")
