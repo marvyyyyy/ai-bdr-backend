@@ -77,11 +77,13 @@ def process_sequences():
                 WHERE id = %s
             """, (now, enrollment_id))
 
+# End of process_sequences()
     conn.commit()
     cur.close()
     conn.close()
+    return f"✅ Finished processing {len(enrollments)} enrollments."
 
 
 if __name__ == "__main__":
-    process_sequences()
-    print("✅ Processed sequences successfully.")
+    message = process_sequences()
+    print(message)

@@ -9,6 +9,8 @@ from flask import request
 from flask import Flask, jsonify
 from flask_cors import CORS
 from send_test_email import send_email
+from create_sequence import create_sequence
+from process_sequences import process_sequences
 from shopify_integration import sync_shopify_customers, sync_shopify_orders, sync_abandoned_checkouts
 from check_replies import check_email_replies
 
@@ -96,6 +98,23 @@ def run_enroll_lead():
 
     result = enroll_lead_in_sequence(lead_id, sequence_id)
     return jsonify({"status": "success", "result": result}), 200
+
+
+@app.route("/create-sequence", methods=["POST"])
+def run_create_sequence():
+    result = create_sequence()
+    if "error" in result:
+        return jsonify({"status": "error", "message": result["error"]}), 500
+    return jsonify({"status": "success", "result": result}), 200
+
+
+@app.route("/process-sequences", methods=["POST"])
+def run_process_sequences():
+    try:
+        result = process_sequences()
+        return jsonify({"status": "success", "message": result}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 if __name__ == "__main__":
