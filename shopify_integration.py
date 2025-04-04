@@ -1,10 +1,10 @@
+# pylint: disable=missing-module-docstring,missing-function-docstring, import-error, import-outside-toplevel, broad-except, wrong-import-order, fixme
+
 # TODO: Fix customer_email fallback logic (def sync_abandoned_checkouts section)
 # Right now, we're only using `checkout.email`, but many records miss `customer_email`.
 # Later, improve this by safely extracting customer.email from checkout.customer if available.
 
-# pylint: disable=missing-module-docstring,missing-function-docstring, import-error, import-outside-toplevel, broad-except, wrong-import-order
-
-import shopify
+import ShopifyAPI as shopify
 import os
 import psycopg2
 from dotenv import load_dotenv

@@ -1,4 +1,4 @@
-# pylint: disable=unused-variable, unused-argument, too-many-locals, too-many-statements, too-many-branches, too-many-return-statements, broad-except, missing-function-docstring, wrong-import-order
+# pylint: disable=unused-variable, unused-argument, too-many-locals, too-many-statements, too-many-branches, too-many-return-statements, broad-except, missing-function-docstring, wrong-import-order, missing-module-docstring
 
 import psycopg2
 import os

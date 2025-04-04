@@ -1,4 +1,4 @@
-# pylint: disable=no-member, missing-function-docstring
+# pylint: disable=no-member, missing-function-docstring, import-error, import-outside-toplevel, broad-except, wrong-import-order, missing-module-docstring
 
 import os
 import base64

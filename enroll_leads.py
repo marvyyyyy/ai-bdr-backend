@@ -1,3 +1,5 @@
+# pylint: disable=missing-module-docstring,missing-function-docstring, import-error, import-outside-toplevel, broad-except, wrong-import-order
+
 import os
 import psycopg2
 from dotenv import load_dotenv

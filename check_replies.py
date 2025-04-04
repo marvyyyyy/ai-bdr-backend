@@ -1,4 +1,4 @@
-# pylint: disable=no-member
+# pylint: disable=no-member, wrong-import-order, broad-except, missing-module-docstring, missing-function-docstring, too-many-locals, too-many-statements
 
 import os
 import re
