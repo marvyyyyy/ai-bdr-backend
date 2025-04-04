@@ -4,7 +4,7 @@
 # Right now, we're only using `checkout.email`, but many records miss `customer_email`.
 # Later, improve this by safely extracting customer.email from checkout.customer if available.
 
-import shopifyapi as shopify
+import shopify
 import os
 import psycopg2
 from dotenv import load_dotenv
