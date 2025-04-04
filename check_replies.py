@@ -17,8 +17,7 @@ TOKEN_FILE = "token_lu.json"
 SCOPES = ['https://mail.google.com/']
 
 
-def check_replies():
-    # Step 1: Authenticate with Gmail
+def check_email_replies():
     creds = None
     if os.path.exists(TOKEN_FILE):
         creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
@@ -35,11 +34,9 @@ def check_replies():
 
     service = build("gmail", "v1", credentials=creds)
 
-    # Step 2: Connect to the database
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
 
-    # Step 3: Get active sequence enrollments
     cur.execute("""
         SELECT se.id, l.email, se.last_sent_at
         FROM sequence_enrollments se
@@ -48,21 +45,22 @@ def check_replies():
     """)
     enrollments = cur.fetchall()
 
-    # Step 4: Build a quick lookup
     enrollment_lookup = {
         email.lower(): {"enrollment_id": enrollment_id, "last_sent_at": last_sent_at}
         for enrollment_id, email, last_sent_at in enrollments
     }
 
-    # Step 5: Fetch emails from inbox
     response = service.users().messages().list(
         userId="me",
         labelIds=["INBOX"],
-        q="is:inbox newer_than:1d"  # You can change the time window
+        q="is:inbox newer_than:1d"
     ).execute()
 
     messages = response.get("messages", [])
     print(f"📨 Found {len(messages)} messages in inbox...")
+
+    replies_detected = 0
+    reply_emails = []
 
     for msg in messages:
         msg_detail = service.users().messages().get(
@@ -76,7 +74,6 @@ def check_replies():
         if not from_email:
             continue
 
-        # Extract just the email portion
         match = re.search(r'<(.+?)>', from_email)
         clean_email = match.group(1).lower() if match else from_email.lower()
 
@@ -98,10 +95,15 @@ def check_replies():
                 """, (enrollment_id,))
                 conn.commit()
 
-    print("✅ Done checking for replies.")
+                replies_detected += 1
+                reply_emails.append(clean_email)
+
     cur.close()
     conn.close()
+    print("✅ Done checking for replies.")
 
-
-if __name__ == "__main__":
-    check_replies()
+    return {
+        "total_messages_checked": len(messages),
+        "replies_detected": replies_detected,
+        "reply_emails": reply_emails
+    }
