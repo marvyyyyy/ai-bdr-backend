@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
-SEQUENCE_ID = "REPLACE_WITH_YOUR_SEQUENCE_UUID"
+SEQUENCE_ID = os.getenv("SEQUENCE_ID")  # Load sequence ID from .env
 
 conn = psycopg2.connect(DATABASE_URL)
 cur = conn.cursor()

@@ -1,3 +1,5 @@
+# pylint: disable=too-many-locals, missing-module-docstring, broad-except
+
 import os
 import psycopg2
 from dotenv import load_dotenv

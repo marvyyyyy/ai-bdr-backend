@@ -1,4 +1,11 @@
 .env
 __pycache__/
-venv/
+.venv/
 .DS_Store
+token_lu.json
+credentials.json
+*.pyc
+*.pyo
+.env/
+.vscode/
+archive/
